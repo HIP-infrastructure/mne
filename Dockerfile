@@ -1,119 +1,37 @@
-FROM ubuntu:20.04
+ARG CI_REGISTRY_IMAGE
+ARG JUPYTERLAB_DESKTOP_VERSION
+FROM ${CI_REGISTRY_IMAGE}/jupyterlab-desktop:${JUPYTERLAB_DESKTOP_VERSION}
+LABEL maintainer="anthony.boyer@univ-amu.fr"
 
-LABEL maintainer=""
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CARD
+ARG CI_REGISTRY
+ARG APP_NAME
+ARG APP_VERSION
 
-ENV DEBIAN_FRONTEND=noninteractive
+LABEL app_version=$APP_VERSION
 
-RUN mkdir /apps
+WORKDIR /apps/${APP_NAME}
 
-# Install wget
 RUN apt-get update && \
-    apt-get install -y wget && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \ 
+    curl -# <app> && \
+    apt-get remove -y --purge curl && \
+    apt-get autoremove -y --purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Init a new user "mne_user" - Python environment about to be created using Conda and Jupyterlab desktop shd not be root
-ARG MNE_USER="mne_user" 
-ARG HOME_DIR="/home/${MNE_USER}"
-ENV MNE_USER=${MNE_USER}
-ENV HOME_DIR=${HOME_DIR}
-RUN useradd -ms /bin/bash -d ${HOME_DIR} ${MNE_USER}
+ENV APP_SHELL="<no>"
+ENV APP_CMD="</path/to/app/executable>"
+ENV PROCESS_NAME="<app_process_name>"
+ENV APP_DATA_DIR_ARRAY="<app_config_dir .app_config_dir>"
+ENV DATA_DIR_ARRAY="<app_data_dir1 app_data_dir2>"
 
-# Install Miniconda
-ARG CONDA_DIR="/apps/conda/"
-ENV PATH="${CONDA_DIR}/bin:${PATH}"
-ARG PATH="${CONDA_DIR}/bin:${PATH}"
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    sh ./Miniconda3-latest-Linux-x86_64.sh -b -p ${CONDA_DIR} && \
-    rm -f ./Miniconda3-latest-Linux-x86_64.sh
-        
-# MNE-Python and other Python packages are installed in a dedicated "mne-env" Python environment of "mne_user" using Conda
+HEALTHCHECK --interval=10s --timeout=10s --retries=5 --start-period=30s \
+  CMD sh -c "/apps/${APP_NAME}/scripts/process-healthcheck.sh \
+  && /apps/${APP_NAME}/scripts/ls-healthcheck.sh /home/${HIP_USER}/nextcloud/"
 
-USER $MNE_USER 
+COPY ./scripts/ scripts/
 
-ARG mne_v=v0.23.0   
-
-RUN conda init && \
-    conda create --name=mne-env
-    
-RUN conda install --yes \
-    -n mne-env \
-    -c conda-forge \
-    python==3.9 \
-    python-blosc \
-    cytoolz \
-    dask==2021.4.0 \
-    lz4 \
-    nomkl \
-    numpy==1.21.0 \
-    pandas==1.3.0 \
-    tini==0.18.0 \
-    && conda clean -tipsy && \
-    conda run -n mne-env pip install s3fs && \
-    conda run -n mne-env pip install bokeh && \
-    conda run -n mne-env pip install nibabel joblib h5py && \
-    conda run -n mne-env pip install pooch && \
-    conda run -n mne-env pip install https://github.com/mne-tools/mne-python/archive/${mne_v}.zip && \
-    conda run -n mne-env pip install vtk pyvista pyvistaqt PyQt5 matplotlib && \
-    conda run -n mne-env pip install jupyterlab ipywidgets ipyvtklink
-    # Install requested/missing Python packages here using Conda or PIP    
-USER root
-
-# 3D plot dependencies
-RUN apt-get update && \
-    apt-get install -y xvfb qt5-default && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-    
-# Freesurfer dependencies
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    apt-get update && \
-    apt-get install -y tcsh
-    
-# JupyterDesktop dependencies
-RUN apt-get install -y libnotify4 && \
-    apt-get install -y libnss3 && \
-    apt-get install -y libxss1 && \
-    apt-get install -y xdg-utils && \
-    apt-get install -y libsecret-1-0
-    
-# Install Freesurfer
-# TODO
-    
-# Install JupyterDesktop  
-RUN wget https://github.com/jupyterlab/jupyterlab-desktop/releases/latest/download/JupyterLab-Setup-Debian.deb
-RUN dpkg -i JupyterLab-Setup-Debian.deb
-RUN rm JupyterLab-Setup-Debian.deb
-
-# Jupyterlab desktop configuration file specifying the location of the "mne-env" Python environment
-RUN mkdir -p /home/mne_user/.config/jupyterlab-desktop/
-COPY ./config/jupyterlab-desktop-data /home/mne_user/.config/jupyterlab-desktop/jupyterlab-desktop-data 
-RUN chmod 777 /home/mne_user/.config/jupyterlab-desktop/ 
-    
-USER $MNE_USER
-WORKDIR $HOME_DIR
-
-# 3D plot ENV
-ENV \
-    MNE_3D_BACKEND=pyvista \
-    MNE_3D_OPTION_ANTIALIAS=false\
-    START_XVFB=true
-        
-CMD jlab --no-sandbox # Sandbox mode might be enabled if requested
-
-
-
-
-
-       
-
-
-
-
-
-
-
-
-
+ENTRYPOINT ["./scripts/docker-entrypoint.sh"]
