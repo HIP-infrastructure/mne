@@ -49,11 +49,13 @@ ENV APP_CMD="/apps/jupyterlab-desktop/node_modules/electron/dist/electron --no-s
 ENV PROCESS_NAME="electron"
 ENV APP_DATA_DIR_ARRAY=""
 ENV DATA_DIR_ARRAY=""
+ENV CONFIG_ARRAY=".bash_profile"
 
 HEALTHCHECK --interval=10s --timeout=10s --retries=5 --start-period=30s \
   CMD sh -c "/apps/${APP_NAME}/scripts/process-healthcheck.sh \
   && /apps/${APP_NAME}/scripts/ls-healthcheck.sh /home/${HIP_USER}/nextcloud/"
 
 COPY ./scripts/ scripts/
+COPY ./apps/${APP_NAME}/config config/
 
 ENTRYPOINT ["./scripts/docker-entrypoint.sh"]
