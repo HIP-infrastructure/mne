@@ -44,9 +44,9 @@ RUN conda install -y -n mne-env -c conda-forge \
 #    conda run -n mne-env pip install https://github.com/mne-tools/mne-python/archive/v${APP_VERSION}.zip && \
 #    conda run -n mne-env pip install vtk pyvista pyvistaqt PyQt5 matplotlib
 
-ENV APP_SHELL="no"
-ENV APP_CMD="/apps/jupyterlab-desktop/node_modules/electron/dist/electron --no-sandbox /apps/jupyterlab-desktop"
-ENV PROCESS_NAME="electron"
+ENV APP_SPECIAL="jupyterlab-desktop"
+ENV APP_CMD=""
+ENV PROCESS_NAME=""
 ENV APP_DATA_DIR_ARRAY=""
 ENV DATA_DIR_ARRAY=""
 ENV CONFIG_ARRAY=".bash_profile"
