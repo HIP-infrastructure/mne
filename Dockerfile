@@ -27,15 +27,15 @@ RUN conda init && \
     conda create --name=mne-env
 
 RUN conda install -y -n mne-env -c conda-forge \
-    python==3.9 \
+    python \
     python-blosc \
     cytoolz \
-    dask==2021.4.0 \
+    dask \
     lz4 \
     nomkl \
-    numpy==1.21.0 \
-    pandas==1.3.0 && \
-    conda clean -tipsy && \
+    numpy \
+    pandas && \
+#    conda clean -tipsy && \
     rm -rf /opt/conda/pkgs
 #    conda run -n mne-env pip install s3fs && \
 #    conda run -n mne-env pip install bokeh && \
