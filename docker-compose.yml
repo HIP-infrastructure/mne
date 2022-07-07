@@ -4,7 +4,7 @@ services:
   mne-python-down:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: fakeuser.Dockerfile
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
