@@ -20,14 +20,14 @@ RUN apt-get update && \
     apt-get install ca-certificates -y && \
     apt-get install --no-install-recommends -y \
     curl && \
-    curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    curl -sSLO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     bash Miniconda3-latest-Linux-x86_64.sh -b -p /apps/conda && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
     export PATH=/apps/conda/bin:$PATH && \
     conda install -c conda-forge -y nodejs constructor && \
     npm install -g yarn && \
     cd /apps && \
-    curl -L https://github.com/jupyterlab/jupyterlab-desktop/archive/refs/tags/v${JUPYTERLAB_DESKTOP_VERSION}.tar.gz | tar xzf - && \
+    curl -sSL https://github.com/jupyterlab/jupyterlab-desktop/archive/refs/tags/v${JUPYTERLAB_DESKTOP_VERSION}.tar.gz | tar xzf - && \
     mv jupyterlab-desktop-${JUPYTERLAB_DESKTOP_VERSION} jupyterlab-desktop && \
     cd jupyterlab-desktop && \
     conda update -y nodejs && \
