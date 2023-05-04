@@ -24,7 +24,8 @@ RUN mamba create -y --override-channels --channel=conda-forge --name=mne_env mne
 ENV APP_SPECIAL="jupyterlab-desktop"
 ENV APP_CMD=""
 ENV PROCESS_NAME=""
-ENV APP_DATA_DIR_ARRAY=".jupyter .config/jupyterlab-desktop"
+ENV APP_DATA_DIR_ARRAY=".jupyter"
+#ENV APP_DATA_DIR_ARRAY=".jupyter .config/jupyterlab-desktop"
 ENV DATA_DIR_ARRAY=""
 
 HEALTHCHECK --interval=10s --timeout=10s --retries=5 --start-period=30s \
